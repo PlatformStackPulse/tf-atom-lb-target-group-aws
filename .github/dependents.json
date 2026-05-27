@@ -1,0 +1,6 @@
+{
+  "molecules": [
+    "tf-molecule-alb-public-aws",
+    "tf-molecule-nlb-internal-aws"
+  ]
+}
