@@ -38,5 +38,5 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add CHANGELOG.md
             git commit -m "docs(changelog): update CHANGELOG.md [skip ci]"
-            git push
+            git push || echo "Push blocked by branch protection — skipping changelog commit"
           fi
