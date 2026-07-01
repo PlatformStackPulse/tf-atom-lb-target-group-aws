@@ -3,9 +3,34 @@
 [![CI](https://github.com/PlatformStackPulse/tf-atom-lb-target-group-aws/actions/workflows/ci.yml/badge.svg)](https://github.com/PlatformStackPulse/tf-atom-lb-target-group-aws/actions/workflows/ci.yml)
 ![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.6.0-blueviolet)
 
-## Purpose
+Terraform atom that provisions an AWS Load Balancer **target group** (`aws_lb_target_group`) with a configurable health check, wired to [tf-label](https://github.com/PlatformStackPulse/tf-label) for consistent naming and tagging.
 
-Terraform atom: AWS LB Target Group - defines targets for load balancer routing.
+## Features
+
+- Creates an `aws_lb_target_group` with configurable `port`, `protocol`, `target_type`, and `deregistration_delay`.
+- Full health-check block: `path`, `port`, `protocol`, healthy/unhealthy thresholds, `timeout`, `interval`, and status-code `matcher`.
+- Supports `instance`, `ip`, `lambda`, and `alb` target types (validated).
+- tf-label naming/tagging via `module.this` — the target group `name` is the generated label `id`.
+- `enabled` toggle (from tf-label context) creates zero resources when `false`.
+- Exposes `id`, `arn`, `arn_suffix`, and `name` outputs for wiring into listeners/rules.
+
+## Usage
+
+```hcl
+module "target_group" {
+  source = "git::https://github.com/PlatformStackPulse/tf-atom-lb-target-group-aws.git?ref=v1.0.0"
+
+  namespace = "eg"
+  stage     = "test"
+  name      = "thing"
+
+  vpc_id = "vpc-0abc123def4567890"
+
+  port        = 8080
+  protocol    = "HTTP"
+  target_type = "ip"
+}
+```
 
 ## Module Documentation
 
@@ -80,3 +105,21 @@ Terraform atom: AWS LB Target Group - defines targets for load balancer routing.
 | <a name="output_id"></a> [id](#output\_id) | ID of the target group |
 | <a name="output_name"></a> [name](#output\_name) | Name of the target group |
 <!-- END_TF_DOCS -->
+
+## Tests
+
+Unit tests use a mock AWS provider (no real AWS calls) and assert on plan-known values — the tf-label `id`, resource count, and input pass-throughs.
+
+```bash
+# Unit tests (mock provider, no credentials)
+terraform init -backend=false
+terraform test -test-directory=tests/unit
+
+# Integration tests (require real AWS credentials)
+terraform test -test-directory=tests/integration
+
+# Or via the Makefile
+make test-unit
+```
+
+Tests live in `tests/unit/` and `tests/integration/`.
